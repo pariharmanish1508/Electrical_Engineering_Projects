@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Electricity Bill Estimator</title>
+    <!-- Google Fonts for Professional Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0F172A;
+            --accent: #2563EB;
+            --accent-hover: #1D4ED8;
+            --bg-color: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text-main: #334155;
+            --text-light: #64748B;
+            --border-color: #E2E8F0;
+            --danger: #EF4444;
+            --success: #10B981;
+            --success-bg: #EFF6FF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 1.5rem 1rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            color: var(--primary);
+            font-size: 1.85rem;
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        header p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            max-width: 750px;
+            margin: 0 auto;
+            text-align: justify;
+            text-justify: inter-word;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        @media(min-width: 768px) {
+            .card {
+                padding: 2rem;
+            }
+            header h1 {
+                font-size: 2.25rem;
+            }
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media(min-width: 640px) {
+            .settings-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .tariff-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--success-bg);
+            padding: 0.85rem 1.25rem;
+            border-radius: 8px;
+            border: 1px solid #BFDBFE;
+            gap: 1rem;
+        }
+
+        .tariff-section label {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        /* Increased box size for currency & tariff inputs */
+        .tariff-section select,
+        .tariff-section input {
+            width: 150px;
+            padding: 0.65rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+            background: white;
+            text-align: right;
+            cursor: pointer;
+        }
+
+        /* Enhanced Custom Dropdown Interface Styling for Currency */
+        .tariff-section select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748B%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.85rem center;
+            background-size: 0.65rem auto;
+            padding-right: 2.25rem;
+            text-align: left;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        @media(min-width: 768px) {
+            .form-grid {
+                grid-template-columns: 2fr 1fr 1fr auto;
+            }
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--text-light);
+        }
+
+        .input-group select, 
+        .input-group input {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s;
+            width: 100%;
+            background-color: #FFFFFF;
+            color: var(--text-main);
+        }
+
+        .input-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748B%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 0.65rem auto;
+            padding-right: 2.5rem;
+            cursor: pointer;
+        }
+
+        .input-group select:hover,
+        .input-group input:hover,
+        .tariff-section select:hover,
+        .tariff-section input:hover {
+            border-color: #94A3B8;
+        }
+
+        .input-group select:focus, 
+        .input-group input:focus,
+        .tariff-section select:focus,
+        .tariff-section input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 100%;
+        }
+
+        @media(min-width: 768px) {
+            .btn {
+                width: auto;
+                height: 46px;
+            }
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            width: auto;
+        }
+
+        .btn-danger:hover {
+            background-color: #DC2626;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px;
+            background: white;
+        }
+
+        th, td {
+            padding: 0.85rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #F1F5F9;
+            color: var(--primary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        td {
+            font-size: 0.9rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .currency-symbol {
+            font-weight: 700;
+            display: inline-block;
+            margin-right: 2px;
+        }
+
+        .summary-box {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        @media(min-width: 640px) {
+            .summary-box {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .summary-card {
+            background: #F8FAFC;
+            padding: 1.25rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .summary-card h3 {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.03em;
+        }
+
+        .summary-card p {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-light);
+            padding: 2.5rem;
+            font-style: italic;
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .tips-card h3 {
+            font-size: 1.15rem;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .tips-card ul {
+            padding-left: 1.25rem;
+            color: var(--text-main);
+            font-size: 0.92rem;
+        }
+
+        .tips-card li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Monthly Electricity Bill Estimator</h1>
+        <p>Estimate daily and monthly electricity consumption and monetary cost for household appliances. Adding a device below calculates its energy usage based on its power rating and daily active hours, appending it instantly to your household breakdown table and summary metrics.</p>
+    </header>
+
+    <!-- Settings Card -->
+    <div class="card" style="padding: 1.25rem 1.5rem;">
+        <div class="settings-grid">
+            <div class="tariff-section">
+                <label for="currencySelect">Currency:</label>
+                <select id="currencySelect" onchange="updateCurrencySymbol()">
+                    <option value="INR" selected>Rupees (₹)</option>
+                    <option value="USD">Dollars ($)</option>
+                    <option value="EUR">Euros (€)</option>
+                </select>
+            </div>
+            <div class="tariff-section">
+                <label for="tariffRate">Rate per Unit/kWh:</label>
+                <input type="number" id="tariffRate" value="7.50" step="0.25" min="0" oninput="calculateTotals()">
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Card -->
+    <div class="card">
+        <h2 style="font-size: 1.15rem; margin-bottom: 1rem; color: var(--primary);">Add Appliance</h2>
+        <div class="form-grid">
+            <div class="input-group">
+                <label for="deviceSelect">Select Appliance</label>
+                <select id="deviceSelect" onchange="updateDefaultWattage()">
+                    <option value="" disabled selected>-- Choose Appliance --</option>
+                    <option value="Fan" data-watt="75">Fan (~75W)</option>
+                    <option value="AC" data-watt="1500">AC (1.5 Ton) (~1500W)</option>
+                    <option value="Cooler" data-watt="200">Air Cooler (~200W)</option>
+                    <option value="Light" data-watt="15">LED Light / Bulb (~15W)</option>
+                    <option value="Fridge" data-watt="150">Refrigerator (~150W)</option>
+                    <option value="TV" data-watt="100">Television (~100W)</option>
+                    <option value="Geyser" data-watt="2000">Water Heater / Geyser (~2000W)</option>
+                    <option value="Washing Machine" data-watt="500">Washing Machine (~500W)</option>
+                    <option value="Motor" data-watt="750">Water Pump / Motor (~750W)</option>
+                    <option value="Grinder" data-watt="500">Mixer Grinder (~500W)</option>
+                    <option value="Iron" data-watt="1000">Clothes Iron (~1000W)</option>
+                    <option value="Induction" data-watt="1500">Induction Cooktop (~1500W)</option>
+                    <option value="Chimney" data-watt="200">Kitchen Chimney (~200W)</option>
+                    <option value="Air Purifier" data-watt="50">Air Purifier (~50W)</option>
+                    <option value="Heater" data-watt="1500">Room Heater (~1500W)</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="wattInput">Rating (Watts)</label>
+                <input type="number" id="wattInput" placeholder="e.g. 100" min="1">
+            </div>
+
+            <div class="input-group">
+                <label for="hoursInput">Hours Active / Day</label>
+                <input type="number" id="hoursInput" placeholder="e.g. 5" min="0.1" max="24" step="0.1">
+            </div>
+
+            <button class="btn" onclick="addDevice()">Add Device</button>
+        </div>
+    </div>
+
+    <!-- Output Data Card -->
+    <div class="card">
+        <h2 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--primary);">Consumption Breakdown</h2>
+        <div id="tableContainerWrapper" style="display: none;">
+            <div class="table-responsive">
+                <table id="deviceTable">
+                    <thead>
+                        <tr>
+                            <th>Appliance</th>
+                            <th>Rating (W)</th>
+                            <th>Hours/Day</th>
+                            <th>Units/Day (kWh)</th>
+                            <th>Units/Month (kWh)</th>
+                            <th id="costTableHeader">Monthly Cost (₹)</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Dynamic Rows Go Here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div id="emptyState" class="empty-state">No appliances added yet. Select and add items above to calculate.</div>
+
+        <!-- Summary Statistics -->
+        <div class="summary-box">
+            <div class="summary-card">
+                <h3>Total Units / Day</h3>
+                <p id="totalDailyUnits">0.00 kWh</p>
+            </div>
+            <div class="summary-card">
+                <h3>Total Units / Month</h3>
+                <p id="totalMonthlyUnits">0.00 kWh</p>
+            </div>
+            <div class="summary-card">
+                <h3>Estimated Monthly Bill</h3>
+                <p id="totalMonthlyCost"><span class="currency-symbol">₹</span> 0.00</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Motivational Energy Saving Tips Card -->
+    <div class="card tips-card">
+        <h3>Power Saving Tips for a Greener & Lower Bill</h3>
+        <ul>
+            <li><strong>Upgrade to 5-Star Appliances:</strong> Energy-efficient (Inverter ACs, 5-star refrigerators) consume up to 30-40% less electricity compared to older models.</li>
+            <li><strong>Optimize AC Usage:</strong> Set your air conditioner temperature to 24°C instead of 18°C. Each degree higher saves roughly 6% on electricity.</li>
+            <li><strong>Embrace LED Lighting:</strong> Swap legacy incandescent bulbs or old tube lights with high-lumens LED alternatives, saving more than 80% lighting power.</li>
+            <li><strong>Unplug Standby Devices:</strong> Electronics consume phantom energy even when turned off. Unplug chargers, TVs, and microwaves when not actively in use.</li>
+            <li><strong>Harness Natural Light & Air:</strong> Maximize cross-ventilation during pleasant hours to minimize continuous dependence on fans and coolers.</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    let appliances = [];
+
+    function getCurrencySymbol() {
+        const currency = document.getElementById('currencySelect').value;
+        if (currency === 'USD') return '$';
+        if (currency === 'EUR') return '€';
+        return '₹';
+    }
+
+    function updateCurrencySymbol() {
+        const currency = document.getElementById('currencySelect').value;
+        const tariffInput = document.getElementById('tariffRate');
+        
+        if (currency === 'USD') {
+            tariffInput.value = '0.15';
+        } else if (currency === 'EUR') {
+            tariffInput.value = '0.20';
+        } else {
+            tariffInput.value = '7.50';
+        }
+
+        document.getElementById('costTableHeader').innerText = `Monthly Cost (${getCurrencySymbol()})`;
+        calculateTotals();
+    }
+
+    function updateDefaultWattage() {
+        const select = document.getElementById('deviceSelect');
+        const selectedOption = select.options[select.selectedIndex];
+        const defaultWatt = selectedOption.getAttribute('data-watt');
+        if (defaultWatt) {
+            document.getElementById('wattInput').value = defaultWatt;
+        }
+    }
+
+    function addDevice() {
+        const select = document.getElementById('deviceSelect');
+        const deviceName = select.value;
+        const wattage = parseFloat(document.getElementById('wattInput').value);
+        const hours = parseFloat(document.getElementById('hoursInput').value);
+
+        if (!deviceName) {
+            alert('Please select an appliance from the dropdown.');
+            return;
+        }
+        if (isNaN(wattage) || wattage <= 0) {
+            alert('Please enter a valid power rating in Watts.');
+            return;
+        }
+        if (isNaN(hours) || hours <= 0 || hours > 24) {
+            alert('Please enter valid active hours between 0.1 and 24.');
+            return;
+        }
+
+        const appliance = {
+            id: Date.now(),
+            name: deviceName,
+            wattage: wattage,
+            hours: hours
+        };
+
+        appliances.push(appliance);
+        
+        select.selectedIndex = 0;
+        document.getElementById('wattInput').value = '';
+        document.getElementById('hoursInput').value = '';
+
+        calculateTotals();
+    }
+
+    function removeDevice(id) {
+        appliances = appliances.filter(app => app.id !== id);
+        calculateTotals();
+    }
+
+    function calculateTotals() {
+        const tariffRate = parseFloat(document.getElementById('tariffRate').value) || 0;
+        const tableBody = document.getElementById('tableBody');
+        const emptyState = document.getElementById('emptyState');
+        const tableWrapper = document.getElementById('tableContainerWrapper');
+        const symbol = getCurrencySymbol();
+        
+        tableBody.innerHTML = '';
+
+        if (appliances.length === 0) {
+            emptyState.style.display = 'block';
+            tableWrapper.style.display = 'none';
+            document.getElementById('totalDailyUnits').innerText = '0.00 kWh';
+            document.getElementById('totalMonthlyUnits').innerText = '0.00 kWh';
+            
+            const costElement = document.getElementById('totalMonthlyCost');
+            costElement.innerHTML = `<span class="currency-symbol">${symbol}</span> 0.00`;
+            costElement.style.color = 'var(--primary)';
+            return;
+        }
+
+        emptyState.style.display = 'none';
+        tableWrapper.style.display = 'block';
+
+        let totalDailyKWh = 0;
+        let totalMonthlyKWh = 0;
+        let totalCost = 0;
+
+        appliances.forEach(app => {
+            const dailyKWh = (app.wattage * app.hours) / 1000;
+            const monthlyKWh = dailyKWh * 30;
+            const monthlyCost = monthlyKWh * tariffRate;
+
+            totalDailyKWh += dailyKWh;
+            totalMonthlyKWh += monthlyKWh;
+            totalCost += monthlyCost;
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>${app.name}</strong></td>
+                <td>${app.wattage} W</td>
+                <td>${app.hours} hrs</td>
+                <td>${dailyKWh.toFixed(2)}</td>
+                <td>${monthlyKWh.toFixed(2)}</td>
+                <td><span class="currency-symbol">${symbol}</span> ${monthlyCost.toFixed(2)}</td>
+                <td><button class="btn btn-danger" onclick="removeDevice(${app.id})">Delete</button></td>
+            `;
+            tableBody.appendChild(row);
+        });
+
+        document.getElementById('totalDailyUnits').innerText = totalDailyKWh.toFixed(2) + ' kWh';
+        document.getElementById('totalMonthlyUnits').innerText = totalMonthlyKWh.toFixed(2) + ' kWh';
+
+        const costElement = document.getElementById('totalMonthlyCost');
+        costElement.innerHTML = `<span class="currency-symbol">${symbol}</span> ` + totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+        if (totalCost < 1500) {
+            costElement.style.color = 'var(--success)';
+        } else if (totalCost <= 5000) {
+            costElement.style.color = 'var(--accent)';
+        } else {
+            costElement.style.color = 'var(--danger)';
+        }
+    }
+</script>
+
+</body>
+</html>
